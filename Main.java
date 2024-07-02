@@ -20,7 +20,7 @@ public class Main {
 		try {
 			System.out.println(" enter your choice");
 			System.out.println("1. test the first soulotion");
-			System.out.println("2. test the sceond soulotion");
+			System.out.println("2. test the sceond soulotion using map ");
 			System.out.println("3. test the ebra soulotion without java map");
 			System.out.println("4. quit");
 			int choice = input.nextInt();
@@ -94,30 +94,46 @@ public class Main {
 	}
 
 	public static void check2() {
-		System.out.println(" enter the first sent");
-		String sent1 = input.next();
-		System.out.println("enter the second  sent");
-		String sent2 = input.next();
-		if (sent1.length() < 2 || sent2.length() < 2) {
-			System.out.println("error :   pleas enter 2 letters or more");
-			return;
-		}
+		 System.out.println(" enter the first sent");
+    String sent1 = input.next();
+    System.out.println("enter the second  sent");
+    String sent2 = input.next();
+    if (  sent1.length()<2 || sent2.length()<2){
+        System.out.println("error :   pleas enter 2 letters or more");
+        return;
+    }
+    sent1.toLowerCase();
+    sent2.toLowerCase();
+ Map <Character,Integer> s1 = new HashMap();
+    for (int i = 0; i <sent1.length() ; i++) {
+        char key = sent1.charAt(i);
 
-		sent1.toLowerCase();
-		sent2.toLowerCase();
-		Stack<Character> total = new Stack<>();
-		if (sent1.length() == sent2.length()) {
-			for (int i = 0; i < sent1.length(); i++) {
+        Integer  value = s1.get(key);
+       if (value==null){
+           value = 1;
+       }
+else {value++;}
+s1.put(key,value);
+    }
+    Map <Character,Integer> s2 = new HashMap();
+    for (int i = 0; i <sent2.length() ; i++) {
+        char key = sent2.charAt(i);
 
-				for (int j = 0; j < sent2.length(); j++) {
-					if (sent1.charAt(i) == sent2.charAt(j)) {
-						total.push(sent1.charAt(i));
-						break;
-					}
+        Integer  value2 = s2.get(key);
+        if (value2==null){
+            value2 = 1;
+        }
+        else {value2++;}
+        s2.put(key,value2);
+    }
+    System.out.println(s1);
+    System.out.println(s2);
 
-				}
-			}
-		}
+    if (s1.equals(s2)){
+        System.out.println("====== Anagram ====== ");
+    }
+    else  System.out.println("====== Not Anagram ====== ");
+    }
 	}
 
 	public static void ebraCheckWithoutMap() {
