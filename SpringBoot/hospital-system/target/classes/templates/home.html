@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Management System - الرئيسية</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Neutral & Professional Home Theme Colors */
+            --primary-color: #2c3e50; /* Deep Slate Blue - Professional, Trustworthy */
+            --secondary-color: #3498db; /* Classic Blue - Connecting theme, used for Doctors link */
+            --tertiary-color: #9b59b6; /* A touch of purple/violet for Patients link (or you can use #f7cac9 for a direct tie) */
+            --accent-color: #e74c3c; /* Standard alert/delete */
+            --success-color: #27ae60; /* Standard success */
+            --text-color: #333;
+            --light-text-color: #f8f8f8;
+            --background-gradient-start: #e9eff5; /* Very light grey-blue */
+            --background-gradient-end: #dce4eb; /* Light grey-blue */
+            --card-background: rgba(255, 255, 255, 0.98);
+            --border-radius: 12px;
+            --box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            --transition-speed: 0.3s;
+        }
+
+        /* Dark Mode Specific Variables */
+        body.dark-mode {
+            --primary-color: #7ab2e9; /* Lighter blue for dark mode primary */
+            --secondary-color: #66d9ef; /* Lighter cyan for dark mode secondary */
+            --tertiary-color: #a780e0; /* Lighter purple for dark mode */
+            --accent-color: #ff6f69;
+            --success-color: #66bb6a;
+            --text-color: #e0e0e0;
+            --light-text-color: #333;
+            --background-gradient-start: #2c3e50;
+            --background-gradient-end: #0f1f2e;
+            --card-background: rgba(35, 47, 60, 0.95);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--background-gradient-start), var(--background-gradient-end));
+            overflow: hidden;
+            position: relative;
+            color: var(--text-color);
+            transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease;
+        }
+
+        /* --- Particle Animation --- */
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: float 18s infinite ease-in-out;
+            pointer-events: none;
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0) translateX(0) scale(1); opacity: 0.8; }
+            50% { transform: translateY(-25px) translateX(25px) scale(1.05); opacity: 0.5; }
+            100% { transform: translateY(0) translateX(0) scale(1); opacity: 0.8; }
+        }
+
+        /* Main Container */
+        .main-container {
+            background: var(--card-background);
+            padding: 40px 60px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            text-align: center;
+            width: 100%;
+            max-width: 800px;
+            z-index: 10;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInScale 0.9s ease-out forwards;
+        }
+
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Blob Animations */
+        .main-container::before {
+            content: '';
+            position: absolute;
+            top: -60px;
+            left: -60px;
+            width: 160px;
+            height: 160px;
+            background: var(--secondary-color);
+            border-radius: 50%;
+            filter: blur(45px);
+            opacity: 0.25;
+            animation: blob1 12s infinite alternate;
+            z-index: -1;
+        }
+
+        .main-container::after {
+            content: '';
+            position: absolute;
+            bottom: -50px;
+            right: -50px;
+            width: 130px;
+            height: 130px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            filter: blur(40px);
+            opacity: 0.2;
+            animation: blob2 15s infinite alternate;
+            z-index: -1;
+        }
+
+        @keyframes blob1 {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(30px, 40px) scale(1.1); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+
+        @keyframes blob2 {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(-40px, -30px) scale(1.05); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+
+        .main-container h1 {
+            color: var(--primary-color);
+            margin-bottom: 25px;
+            font-size: 3.2em;
+            font-weight: 700;
+            letter-spacing: 1px;
+            animation: slideInDown 0.7s ease-out forwards;
+        }
+
+        .main-container p {
+            font-size: 1.15em;
+            line-height: 1.7;
+            margin-bottom: 40px;
+            color: #555;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            animation: fadeIn 1.2s ease-out forwards;
+        }
+
+        /* Navigation Cards */
+        .navigation-cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+        }
+
+        .nav-card {
+            background: #fdfdfd;
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            text-decoration: none;
+            color: var(--text-color);
+            width: 100%;
+            max-width: 280px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all var(--transition-speed) ease;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            /* Ensure the text color within the card also adapts in dark mode */
+            color: var(--text-color);
+        }
+
+        .nav-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            transition: height 0.3s ease, opacity 0.3s ease; /* Added opacity transition */
+            z-index: -1;
+        }
+
+        .nav-card.doctors::before { background: var(--secondary-color); }
+        .nav-card.patients::before { background: var(--tertiary-color); } /* New color for Patients link */
+        .nav-card.users::before { background: var(--success-color); } /* Specific color for Users link */
+        /* New style for change password card */
+        .nav-card.change-password::before { background: #ffc107; } /* A warm yellow/orange color */
+
+
+        .nav-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .nav-card:hover::before {
+             height: 100%;
+             opacity: 0.1;
+        }
+
+        .nav-card .icon-circle {
+            background: var(--background-gradient-start);
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .nav-card.doctors .icon-circle { color: var(--secondary-color); }
+        .nav-card.patients .icon-circle { color: var(--tertiary-color); }
+        .nav-card.users .icon-circle { color: var(--success-color); }
+        /* New style for change password icon */
+        .nav-card.change-password .icon-circle { color: #ffc107; } /* Matching color */
+
+        .nav-card i {
+            font-size: 3em;
+        }
+
+        .nav-card h3 {
+            font-size: 1.6em;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+            transition: color var(--transition-speed) ease;
+        }
+
+        .nav-card p {
+            font-size: 0.95em;
+            color: #777;
+            line-height: 1.5;
+            margin-bottom: 0;
+            transition: color var(--transition-speed) ease;
+        }
+
+        /* Dark mode specific styles */
+        body.dark-mode .main-container h1,
+        body.dark-mode .nav-card h3 {
+            color: var(--primary-color);
+        }
+
+        body.dark-mode .main-container p {
+            color: #b0b0b0;
+        }
+
+        body.dark-mode .nav-card {
+            background: #2e3d4e;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            color: var(--text-color); /* Ensure text color changes */
+        }
+
+        body.dark-mode .nav-card:hover {
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        body.dark-mode .nav-card::before {
+            background: var(--secondary-color); /* Updated for dark mode */
+        }
+        body.dark-mode .nav-card.doctors::before { background: var(--secondary-color); }
+        body.dark-mode .nav-card.patients::before { background: var(--tertiary-color); }
+        body.dark-mode .nav-card.users::before { background: var(--success-color); }
+        /* Dark mode for change password card */
+        body.dark-mode .nav-card.change-password::before { background: #fbc02d; } /* Darker yellow for dark mode */
+
+
+        body.dark-mode .nav-card .icon-circle {
+            background: #3a4b5c;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        body.dark-mode .nav-card.doctors .icon-circle { color: var(--secondary-color); }
+        body.dark-mode .nav-card.patients .icon-circle { color: var(--tertiary-color); }
+        body.dark-mode .nav-card.users .icon-circle { color: var(--success-color); }
+        /* Dark mode for change password icon */
+        body.dark-mode .nav-card.change-password .icon-circle { color: #fbc02d; }
+
+
+        .dark-mode-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.3);
+            border: none;
+            border-radius: 20px;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 0.9em;
+            color: var(--text-color);
+            transition: background 0.3s ease, color 0.3s ease;
+            z-index: 100;
+        }
+
+        .dark-mode-toggle:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+<button class="dark-mode-toggle" id="darkModeToggle">تبديل الوضع الليلي</button>
+
+<div id="particles-container"></div>
+
+<div class="main-container">
+    <h1>مرحباً بك في نظام إدارة المستشفى (HMS)</h1>
+    <p>نظامنا الشامل يتيح لك إدارة فعالة لسجلات المرضى ومعلومات الأطباء. منصة بديهية وآمنة لتعزيز رعاية صحية أفضل.</p>
+
+    <div class="navigation-cards">
+        <a th:href="@{/doctors}" class="nav-card doctors">
+            <div class="icon-circle">
+                <i class="fas fa-user-md"></i>
+            </div>
+            <h3>إدارة الأطباء</h3>
+            <p>إدارة ملفات الأطباء، تخصصاتهم، وجداولهم لتقديم رعاية صحية مثالية.</p>
+        </a>
+
+        <a th:href="@{/patients}" class="nav-card patients">
+            <div class="icon-circle">
+                <i class="fas fa-hospital-user"></i>
+            </div>
+            <h3>سجلات المرضى</h3>
+            <p>الوصول وتحديث تفاصيل صحة المرضى، تاريخهم الطبي، وجهات اتصال الطوارئ.</p>
+        </a>
+
+        <a th:href="@{/change-password}" class="nav-card change-password">
+            <div class="icon-circle">
+                <i class="fas fa-key"></i>
+            </div>
+            <h3>تغيير كلمة المرور</h3>
+            <p>تحديث كلمة المرور الخاصة بحسابك لتعزيز الأمان.</p>
+        </a>
+
+        <th:block sec:authorize="hasRole('ADMIN')">
+            <a th:href="@{/users}" class="nav-card users">
+                <div class="icon-circle">
+                    <i class="fas fa-users-cog"></i>
+                </div>
+                <h3>إدارة المستخدمين</h3>
+                <p>عرض وإدارة حسابات المستخدمين وصلاحياتهم داخل النظام.</p>
+            </a>
+        </th:block>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const particlesContainer = document.getElementById('particles-container');
+
+        // --- Particle Generation ---
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.classList.add('particle');
+            particlesContainer.appendChild(particle);
+
+            const size = Math.random() * 10 + 5; // Size between 5px and 15px
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
+            particle.style.left = `${Math.random() * 100}%`;
+            particle.style.top = `${Math.random() * 100}%`;
+            particle.style.animationDelay = `${Math.random() * -10}s`;
+            particle.style.animationDuration = `${Math.random() * 10 + 10}s`;
+
+            particle.addEventListener('animationend', () => {
+                particle.remove();
+            });
+        }
+
+        // Create some initial particles and then continuously add more
+        for (let i = 0; i < 15; i++) {
+            createParticle();
+        }
+        setInterval(createParticle, 600);
+
+        // --- Dark Mode Toggle ---
+        darkModeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            if (document.body.classList.contains('dark-mode')) {
+                localStorage.setItem('darkMode', 'enabled');
+            } else {
+                localStorage.setItem('darkMode', 'disabled');
+            }
+        });
+
+        // Check for dark mode preference on load
+        if (localStorage.getItem('darkMode') === 'enabled') {
+            document.body.classList.add('dark-mode');
+        }
+    });
+</script>
+</body>
+</html>
