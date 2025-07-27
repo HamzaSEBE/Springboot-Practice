@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>خطأ - حدث خطأ ما</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f8f8;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            flex-direction: column;
+        }
+        .error-container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 600px;
+            width: 90%;
+            direction: rtl; /* For Arabic */
+            text-align: right; /* For Arabic */
+        }
+        h1 {
+            color: #e74c3c;
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 1.2em;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+        a {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 1.1em;
+            transition: background-color 0.3s ease;
+        }
+        a:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+<div class="error-container">
+    <h1>حدث خطأ!</h1>
+    <p>عذرًا، حدث خطأ غير متوقع.</p>
+    <p>يرجى المحاولة مرة أخرى لاحقًا، أو الاتصال بالدعم الفني إذا استمرت المشكلة.</p>
+    <p>
+        <span th:if="${status}" th:text="'الرمز: ' + ${status}"></span>
+        <span th:if="${error}" th:text="' - الخطأ: ' + ${error}"></span>
+    </p>
+    <a href="/home">العودة إلى الصفحة الرئيسية</a>
+</div>
+</body>
+</html>

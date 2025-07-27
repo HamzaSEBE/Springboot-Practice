@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة المستخدمين - HMS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Neutral & Professional Home Theme Colors (Consistent with Home Page) */
+            --primary-color: #2c3e50; /* Deep Slate Blue */
+            --secondary-color: #3498db; /* Classic Blue */
+            --accent-color: #e74c3c; /* Soft Red for alerts/delete */
+            --success-color: #27ae60; /* Dark Green for success */
+            --warning-color: #f39c12; /* Orange for warning/revoke role */
+            --text-color: #333;
+            --light-text-color: #f8f8f8;
+            --background-gradient-start: #e9eff5; /* Very light grey-blue */
+            --background-gradient-end: #dce4eb; /* Light grey-blue */
+            --card-background: rgba(255, 255, 255, 0.98);
+            --border-radius: 12px;
+            --box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            --transition-speed: 0.3s;
+        }
+
+        /* Dark Mode Specific Variables (Consistent with Home Page) */
+        body.dark-mode {
+            --primary-color: #7ab2e9; /* Lighter blue for dark mode primary */
+            --secondary-color: #66d9ef; /* Lighter cyan for dark mode secondary */
+            --accent-color: #ff6f69;
+            --success-color: #66bb6a;
+            --warning-color: #f9bf45; /* Lighter orange for dark mode */
+            --text-color: #e0e0e0;
+            --light-text-color: #333;
+            --background-gradient-start: #2c3e50;
+            --background-gradient-end: #0f1f2e;
+            --card-background: rgba(35, 47, 60, 0.95);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--background-gradient-start), var(--background-gradient-end));
+            overflow: hidden;
+            position: relative;
+            color: var(--text-color);
+            transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease;
+        }
+
+        /* --- Particle Animation (Consistent) --- */
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: float 18s infinite ease-in-out;
+            pointer-events: none;
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0) translateX(0) scale(1); opacity: 0.8; }
+            50% { transform: translateY(-25px) translateX(25px) scale(1.05); opacity: 0.5; }
+            100% { transform: translateY(0) translateX(0) scale(1); opacity: 0.8; }
+        }
+
+        /* Main Container */
+        .main-container {
+            background: var(--card-background);
+            padding: 40px 60px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            text-align: center;
+            width: 100%;
+            max-width: 800px;
+            z-index: 10;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInScale 0.9s ease-out forwards;
+        }
+
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Blob Animations (Consistent) */
+        .main-container::before {
+            content: '';
+            position: absolute;
+            top: -60px;
+            left: -60px;
+            width: 160px;
+            height: 160px;
+            background: var(--secondary-color);
+            border-radius: 50%;
+            filter: blur(45px);
+            opacity: 0.25;
+            animation: blob1 12s infinite alternate;
+            z-index: -1;
+        }
+
+        .main-container::after {
+            content: '';
+            position: absolute;
+            bottom: -50px;
+            right: -50px;
+            width: 130px;
+            height: 130px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            filter: blur(40px);
+            opacity: 0.2;
+            animation: blob2 15s infinite alternate;
+            z-index: -1;
+        }
+
+        @keyframes blob1 {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(30px, 40px) scale(1.1); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+
+        @keyframes blob2 {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(-40px, -30px) scale(1.05); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+
+        .main-container h2 {
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            font-size: 2.8em;
+            font-weight: 700;
+            letter-spacing: 1px;
+            animation: slideInDown 0.7s ease-out forwards;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .controls-section {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 25px;
+        }
+
+        .add-user-btn {
+            padding: 12px 25px;
+            background: linear-gradient(45deg, var(--secondary-color), #5dade2);
+            color: var(--light-text-color);
+            border: none;
+            border-radius: 8px;
+            font-size: 1.05em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .add-user-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
+            background: linear-gradient(45deg, #5dade2, var(--secondary-color));
+        }
+
+        .add-user-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.5s ease, height 0.5s ease;
+            z-index: -1;
+        }
+
+        .add-user-btn:hover::before {
+            width: 200px;
+            height: 200px;
+        }
+
+        .users-table-container {
+            margin-top: 30px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            background: #fff;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .users-table th,
+        .users-table td {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+            font-size: 1em;
+            color: var(--text-color);
+        }
+
+        .users-table th {
+            background: var(--secondary-color);
+            color: var(--light-text-color);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        .users-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .users-table tbody tr:hover {
+            background-color: rgba(52, 152, 219, 0.08);
+            transition: background-color 0.3s ease;
+        }
+        
+        .role-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .role-admin {
+            background-color: var(--primary-color);
+            color: var(--light-text-color);
+        }
+
+        .role-assistant {
+            background-color: var(--success-color);
+            color: var(--light-text-color);
+        }
+
+        .role-viewer {
+            background-color: #8c8c8c;
+            color: var(--light-text-color);
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 40px;
+            padding: 12px 25px;
+            background-color: #6c757d;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 1.05em;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .back-btn:hover {
+            background-color: #5a6268;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+        }
+
+        /* Action Buttons in Table */
+        .action-btns button {
+            background: none;
+            border: none;
+            font-size: 1.1em;
+            cursor: pointer;
+            padding: 5px 8px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            color: #a0a0a0;
+        }
+
+        .action-btns button:hover {
+            background-color: rgba(0, 0, 0, 0.06);
+        }
+
+        .action-btns .revoke-role-btn {
+            color: var(--warning-color);
+        }
+        .action-btns .revoke-role-btn:hover {
+            background-color: rgba(243, 156, 18, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .action-btns .delete-user-btn {
+            color: var(--accent-color);
+        }
+        .action-btns .delete-user-btn:hover {
+            background-color: rgba(231, 76, 60, 0.1);
+            transform: translateY(-2px);
+        }
+
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: var(--card-background);
+            margin: auto;
+            padding: 35px 40px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            width: 90%;
+            max-width: 450px;
+            position: relative;
+            animation: slideInUp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        @keyframes slideInUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-content h3 {
+            color: var(--primary-color);
+            margin-bottom: 25px;
+            font-size: 2em;
+        }
+
+        .modal-content .input-group {
+            margin-bottom: 25px;
+            position: relative;
+            text-align: left;
+        }
+
+        .modal-content .input-group input,
+        .modal-content .input-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            background: #f8f8f8;
+            transition: all var(--transition-speed) ease;
+            color: var(--text-color);
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+        }
+        .modal-content .input-group select {
+            padding-right: 40px;
+            background-image: url('data:image/svg+xml;utf8,<svg fill="%23b0b0b0" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 24px;
+        }
+
+        .modal-content .input-group input:focus,
+        .modal-content .input-group select:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.3);
+            background: #fff;
+        }
+
+        .modal-content .input-group label {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #b0b0b0;
+            font-size: 1em;
+            pointer-events: none;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .modal-content .input-group input:focus + label,
+        .modal-content .input-group input:not(:placeholder-shown) + label,
+        .modal-content .input-group input.not-empty + label,
+        .modal-content .input-group select:focus + label,
+        .modal-content .input-group select:not([value=""]) + label {
+            top: -10px;
+            left: 12px;
+            font-size: 0.85em;
+            color: var(--secondary-color);
+            background: var(--card-background);
+            padding: 0 5px;
+            border-radius: 5px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .modal-buttons button {
+            padding: 10px 22px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+        }
+
+        .modal-buttons .save-btn {
+            background: linear-gradient(45deg, var(--success-color), #4CAF50);
+            color: var(--light-text-color);
+        }
+
+        .modal-buttons .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+            background: linear-gradient(45deg, #4CAF50, var(--success-color));
+        }
+
+        .modal-buttons .cancel-btn {
+            background: #e0e0e0;
+            color: var(--text-color);
+        }
+
+        .modal-buttons .cancel-btn:hover {
+            background: #d0d0d0;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+        }
+
+        .close-button {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 2em;
+            font-weight: bold;
+            color: #c0c0c0;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: var(--accent-color);
+        }
+
+        /* Message Toast */
+        .message-toast {
+            position: fixed;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 30px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+            z-index: 1000;
+            color: white;
+            font-weight: 500;
+            font-size: 1em;
+        }
+
+        .message-toast.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .message-toast.success {
+            background-color: var(--success-color);
+        }
+
+        .message-toast.error {
+            background-color: var(--accent-color);
+        }
+
+
+        /* Dark Mode styles for this page */
+        body.dark-mode .main-container h2 {
+            color: var(--primary-color);
+        }
+
+        body.dark-mode .add-user-btn {
+            background: linear-gradient(45deg, var(--secondary-color), #4092d0);
+            color: var(--light-text-color);
+        }
+        body.dark-mode .add-user-btn:hover {
+            background: linear-gradient(45deg, #4092d0, var(--secondary-color));
+        }
+
+
+        body.dark-mode .users-table-container {
+            background: #2e3d4e;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        body.dark-mode .users-table th {
+            background: var(--secondary-color);
+            color: var(--light-text-color);
+        }
+
+        body.dark-mode .users-table td {
+            border-bottom-color: #3b4d61;
+        }
+
+        body.dark-mode .users-table tbody tr:hover {
+            background-color: rgba(102, 217, 239, 0.08);
+        }
+
+        body.dark-mode .role-badge.role-admin {
+            background-color: var(--primary-color);
+        }
+
+        body.dark-mode .role-badge.role-assistant {
+            background-color: var(--success-color);
+        }
+        body.dark-mode .role-badge.role-viewer {
+            background-color: #606060;
+        }
+
+        body.dark-mode .action-btns button {
+            color: #b0b0b0;
+        }
+        body.dark-mode .action-btns button:hover {
+            background-color: rgba(255, 255, 255, 0.06);
+        }
+
+        body.dark-mode .action-btns .revoke-role-btn {
+            color: var(--warning-color);
+        }
+        body.dark-mode .action-btns .revoke-role-btn:hover {
+            background-color: rgba(249, 191, 69, 0.1);
+        }
+
+        body.dark-mode .action-btns .delete-user-btn {
+            color: var(--accent-color);
+        }
+        body.dark-mode .action-btns .delete-user-btn:hover {
+            background-color: rgba(255, 111, 105, 0.1);
+        }
+
+        body.dark-mode .back-btn {
+            background-color: #4a5d70;
+            color: var(--text-color);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        body.dark-mode .back-btn:hover {
+            background-color: #556b82;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.25);
+        }
+
+        /* Modal Dark Mode */
+        body.dark-mode .modal-content {
+            background-color: var(--card-background);
+        }
+        body.dark-mode .modal-content h3 {
+            color: var(--primary-color);
+        }
+        body.dark-mode .modal-content .input-group input,
+        body.dark-mode .modal-content .input-group select {
+            background: #2a3a4a;
+            border-color: #4c627a;
+            color: var(--text-color);
+        }
+        body.dark-mode .modal-content .input-group input:focus,
+        body.dark-mode .modal-content .input-group select:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(102, 217, 239, 0.3);
+            background: #3a4a5a;
+        }
+        body.dark-mode .modal-content .input-group label {
+            color: #a0a0a0;
+        }
+        body.dark-mode .modal-content .input-group input:focus + label,
+        body.dark-mode .modal-content .input-group input:not(:placeholder-shown) + label,
+        body.dark-mode .modal-content .input-group input.not-empty + label,
+        body.dark-mode .modal-content .input-group select:focus + label,
+        body.dark-mode .modal-content .input-group select:not([value=""]) + label {
+            color: var(--secondary-color);
+            background: var(--card-background);
+        }
+        body.dark-mode .modal-buttons .save-btn {
+            background: linear-gradient(45deg, var(--success-color), #4CAF50);
+            color: var(--light-text-color);
+        }
+        body.dark-mode .modal-buttons .save-btn:hover {
+            background: linear-gradient(45deg, #4CAF50, var(--success-color));
+        }
+        body.dark-mode .modal-buttons .cancel-btn {
+            background: #4a5d70;
+            color: var(--text-color);
+        }
+        body.dark-mode .modal-buttons .cancel-btn:hover {
+            background: #556b82;
+        }
+        body.dark-mode .close-button {
+            color: #b0b0b0;
+        }
+
+        /* Dark Mode Toggle Button NEW STYLES */
+        .dark-mode-toggle {
+            position: fixed; /* Changed from absolute to fixed to stay in view */
+            top: 25px; /* Spaced from top */
+            right: 25px; /* Spaced from right */
+            background: rgba(255, 255, 255, 0.2); /* Semi-transparent white for light mode */
+            border: 1px solid rgba(255, 255, 255, 0.3); /* Subtle border */
+            border-radius: 50%; /* Make it circular */
+            width: 45px; /* Fixed width and height for a perfect circle */
+            height: 45px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 1.5em; /* Larger icon */
+            color: var(--text-color); /* Inherit text color */
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(5px); /* Subtle blur effect */
+            -webkit-backdrop-filter: blur(5px); /* For Safari */
+            z-index: 1000; /* Ensure it's above other content */
+        }
+
+        .dark-mode-toggle:hover {
+            background: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+            transform: scale(1.05);
+        }
+
+        /* Dark Mode Toggle in Dark Mode */
+        body.dark-mode .dark-mode-toggle {
+            background: rgba(0, 0, 0, 0.3); /* Semi-transparent black for dark mode */
+            border: 1px solid rgba(0, 0, 0, 0.4);
+            color: var(--light-text-color); /* Light text in dark mode */
+        }
+
+        body.dark-mode .dark-mode-toggle:hover {
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .dark-mode-toggle i {
+            transition: transform 0.3s ease; /* Smooth icon rotation */
+        }
+
+        .dark-mode-toggle.dark-mode-active i.fa-moon {
+            display: block; /* Show moon when dark mode is active */
+        }
+        .dark-mode-toggle.dark-mode-active i.fa-sun {
+            display: none; /* Hide sun when dark mode is active */
+        }
+        .dark-mode-toggle:not(.dark-mode-active) i.fa-moon {
+            display: none; /* Hide moon when dark mode is not active */
+        }
+        .dark-mode-toggle:not(.dark-mode-active) i.fa-sun {
+            display: block; /* Show sun when dark mode is not active */
+        }
+    </style>
+</head>
+<body>
+    <button class="dark-mode-toggle" id="darkModeToggle">
+        <i class="fas fa-sun"></i> <i class="fas fa-moon" style="display: none;"></i> </button>
+
+    <div id="particles-container"></div>
+
+    <div class="main-container">
+        <h2><i class="fas fa-users-cog"></i> إدارة المستخدمين</h2>
+
+        <div class="controls-section">
+            <button class="add-user-btn" id="addUserBtn">
+                <i class="fas fa-user-plus"></i> إضافة مستخدم جديد
+            </button>
+        </div>
+
+        <div class="users-table-container">
+            <table class="users-table" id="usersTable">
+                <thead>
+                    <tr>
+                        <th>اسم المستخدم</th>
+                        <th>الصلاحية</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    </tbody>
+            </table>
+        </div>
+
+        <a th:href="@{/home}" class="back-btn">
+            <i class="fas fa-arrow-left"></i> العودة إلى الرئيسية
+        </a>
+    </div>
+
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeModalBtn">&times;</span>
+            <h3 id="modalTitle">إضافة مستخدم جديد</h3>
+            <form id="userForm">
+                <input type="hidden" id="userId">
+                <div class="input-group">
+                    <input type="text" id="username" placeholder=" " required>
+                    <label for="username">اسم المستخدم</label>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="password" placeholder=" " required>
+                    <label for="password">كلمة المرور</label>
+                </div>
+                <div class="input-group">
+                    <select id="userRole" required>
+                        <option value="" disabled selected>اختر الصلاحية</option>
+                        <option value="ROLE_ASSISTANT">مساعد مسؤول (Admin Assistant)</option>
+                        <option value="ROLE_VIEWER">مشاهد فقط (Viewer)</option>
+                    </select>
+                    <label for="userRole">الصلاحية</label>
+                </div>
+                <div class="modal-buttons">
+                    <button type="button" class="cancel-btn" id="cancelFormBtn">إلغاء</button>
+                    <button type="submit" class="save-btn">حفظ المستخدم</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="messageToast" class="message-toast"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const usersTableBody = document.querySelector('#usersTable tbody');
+            const addUserBtn = document.getElementById('addUserBtn');
+            const userModal = document.getElementById('userModal');
+            const closeModalBtn = document.getElementById('closeModalBtn');
+            const cancelFormBtn = document.getElementById('cancelFormBtn');
+            const userForm = document.getElementById('userForm');
+            const modalTitle = document.getElementById('modalTitle');
+            const userIdInput = document.getElementById('userId');
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            const userRoleSelect = document.getElementById('userRole');
+            const messageToast = document.getElementById('messageToast');
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            const particlesContainer = document.getElementById('particles-container');
+
+            // --- Dummy Data (simulating backend users) ---
+            let users = [
+                { id: 1, username: 'Admin', role: 'ROLE_ADMIN', password: 'adminpassword' },
+                { id: 2, username: 'Admin Assistant', role: 'ROLE_ASSISTANT', password: 'assistantpassword' },
+                { id: 3, username: 'Viewer User', role: 'ROLE_VIEWER', password: 'viewerpassword' }
+            ];
+            let nextUserId = users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1;
+
+            // --- Particle Generation ---
+            function createParticle() {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                particlesContainer.appendChild(particle);
+
+                const size = Math.random() * 10 + 5;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`;
+                particle.style.animationDelay = `${Math.random() * -10}s`;
+                particle.style.animationDuration = `${Math.random() * 10 + 10}s`;
+
+                particle.addEventListener('animationend', () => {
+                    particle.remove();
+                });
+            }
+
+            for (let i = 0; i < 15; i++) {
+                createParticle();
+            }
+            setInterval(createParticle, 600);
+
+            // --- Render Users Table ---
+            function renderUsers() {
+                usersTableBody.innerHTML = '';
+                if (users.length === 0) {
+                    usersTableBody.innerHTML = `<tr><td colspan="3" style="text-align: center; padding: 20px; color: var(--text-color);">لا يوجد مستخدمون مسجلون بعد.</td></tr>`;
+                    return;
+                }
+
+                users.forEach(user => {
+                    const row = usersTableBody.insertRow();
+                    row.dataset.id = user.id;
+
+                    let roleText;
+                    let roleClass;
+                    let userIcon;
+
+                    if (user.role === 'ROLE_ADMIN') {
+                        roleText = 'مسؤول النظام';
+                        roleClass = 'role-admin';
+                        userIcon = 'fas fa-user-tie';
+                    } else if (user.role === 'ROLE_ASSISTANT') {
+                        roleText = 'مساعد مسؤول';
+                        roleClass = 'role-assistant';
+                        userIcon = 'fas fa-user-shield';
+                    } else if (user.role === 'ROLE_VIEWER') {
+                        roleText = 'مشاهد فقط';
+                        roleClass = 'role-viewer';
+                        userIcon = 'fas fa-user';
+                    } else {
+                        roleText = 'غير محدد';
+                        roleClass = '';
+                        userIcon = 'fas fa-user';
+                    }
+
+                    row.innerHTML = `
+                        <td><i class="${userIcon}"></i> ${user.username}</td>
+                        <td><span class="role-badge ${roleClass}">${roleText}</span></td>
+                        <td class="action-btns">
+                            ${user.role === 'ROLE_ASSISTANT' ?
+                                `<button class="revoke-role-btn" title="سحب الصلاحية"><i class="fas fa-user-minus"></i></button>` : ''
+                            }
+                            ${user.role !== 'ROLE_ADMIN' ? // Admin cannot be deleted
+                                `<button class="delete-user-btn" title="حذف المستخدم"><i class="fas fa-trash-alt"></i></button>` : ''
+                            }
+                        </td>
+                    `;
+                });
+            }
+
+            // --- Show/Hide Message Toast ---
+            function showMessage(message, type = 'success') {
+                messageToast.textContent = message;
+                messageToast.className = `message-toast show ${type}`;
+                setTimeout(() => {
+                    messageToast.classList.remove('show');
+                }, 3500);
+            }
+
+            // --- Modal Operations ---
+            function openModal() {
+                userModal.style.display = 'flex';
+                userModal.classList.add('show');
+                userForm.reset();
+                passwordInput.required = true;
+                modalTitle.textContent = 'إضافة مستخدم جديد';
+                userIdInput.value = '';
+
+                userRoleSelect.innerHTML = `
+                    <option value="" disabled selected>اختر الصلاحية</option>
+                    <option value="ROLE_ASSISTANT">مساعد مسؤول (Admin Assistant)</option>
+                    <option value="ROLE_VIEWER">مشاهد فقط (Viewer)</option>
+                `;
+
+                [usernameInput, passwordInput, userRoleSelect].forEach(input => {
+                    input.classList.remove('not-empty');
+                });
+            }
+
+            function closeCustomModal() {
+                userModal.classList.remove('show');
+                setTimeout(() => {
+                    userModal.style.display = 'none';
+                }, 400);
+            }
+
+            // --- Event Listeners ---
+            addUserBtn.addEventListener('click', openModal);
+            closeModalBtn.addEventListener('click', closeCustomModal);
+            cancelFormBtn.addEventListener('click', closeCustomModal);
+
+            window.addEventListener('click', (event) => {
+                if (event.target == userModal) {
+                    closeCustomModal();
+                }
+            });
+
+            // Add Form Submission
+            userForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+
+                const username = usernameInput.value.trim();
+                const password = passwordInput.value.trim();
+                const role = userRoleSelect.value;
+
+                if (!username || !password || !role) {
+                    showMessage('يرجى ملء جميع الحقول المطلوبة.', 'error');
+                    return;
+                }
+
+                if (users.some(u => u.username.toLowerCase() === username.toLowerCase())) {
+                    showMessage('اسم المستخدم هذا موجود بالفعل.', 'error');
+                    return;
+                }
+                
+                const newUser = { id: nextUserId++, username, password, role };
+                users.push(newUser);
+                showMessage('تم إضافة مستخدم جديد بنجاح!', 'success');
+
+                closeCustomModal();
+                renderUsers();
+            });
+
+            // Delegate events for Revoke Role and Delete buttons on the table
+            usersTableBody.addEventListener('click', (event) => {
+                const target = event.target;
+                const row = target.closest('tr');
+                if (!row) return;
+
+                const userId = parseInt(row.dataset.id);
+                const user = users.find(u => u.id === userId);
+
+                if (!user) return;
+
+                if (target.closest('.revoke-role-btn')) {
+                    if (user.role === 'ROLE_ASSISTANT') {
+                        if (confirm(`هل أنت متأكد من رغبتك في سحب صلاحية "${user.username}" ليصبح مشاهدًا فقط؟`)) {
+                            user.role = 'ROLE_VIEWER';
+                            showMessage(`تم سحب صلاحية "${user.username}" بنجاح!`, 'success');
+                            renderUsers();
+                        }
+                    }
+                } else if (target.closest('.delete-user-btn')) {
+                    if (user.role === 'ROLE_ADMIN') {
+                        showMessage('لا يمكن حذف مستخدم المسؤول الأساسي.', 'error');
+                        return;
+                    }
+                    if (confirm(`هل أنت متأكد من رغبتك في حذف المستخدم "${user.username}"؟`)) {
+                        users = users.filter(u => u.id !== userId);
+                        showMessage('تم حذف المستخدم بنجاح!', 'success');
+                        renderUsers();
+                    }
+                }
+            });
+
+            // Ensure floating labels work on load for pre-filled fields
+            [usernameInput, passwordInput, userRoleSelect].forEach(input => {
+                input.addEventListener('input', () => {
+                    if (input.value) {
+                        input.classList.add('not-empty');
+                    } else {
+                        input.classList.remove('not-empty');
+                    }
+                });
+            });
+
+            // --- Dark Mode Toggle ---
+            function setDarkMode(isDarkMode) {
+                if (isDarkMode) {
+                    document.body.classList.add('dark-mode');
+                    darkModeToggle.classList.add('dark-mode-active');
+                    localStorage.setItem('darkMode', 'enabled');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                    darkModeToggle.classList.remove('dark-mode-active');
+                    localStorage.setItem('darkMode', 'disabled');
+                }
+            }
+
+            darkModeToggle.addEventListener('click', () => {
+                const isCurrentlyDarkMode = document.body.classList.contains('dark-mode');
+                setDarkMode(!isCurrentlyDarkMode);
+            });
+
+            // Check for dark mode preference on load
+            if (localStorage.getItem('darkMode') === 'enabled') {
+                setDarkMode(true);
+            } else {
+                setDarkMode(false);
+            }
+
+            // Initial render
+            renderUsers();
+        });
+    </script>
+</body>
+</html>
